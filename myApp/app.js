@@ -62,10 +62,8 @@ app.post('/', function(req, res){
           }
         }
       });
-    })
-    
+    }) 
   }
-  
 });
 
 app.get('/registration', function(req, res){
