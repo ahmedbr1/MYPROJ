@@ -72,7 +72,7 @@ app.get('/registration', function(req, res){
 app.post('/register', function(req, res){
   var new_username = req.body.username;
   var new_pass = req.body.password;
-  if (!new_username || !new_pass) console.log("You must enter a username and password")
+  if (!new_username || !new_pass) res.status(400).json("You must enter a username and password")
     else{
       MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
         db = client.db('MyDB');
