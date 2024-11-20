@@ -4,7 +4,7 @@ var app = express();
 var mongodb = require('mongodb');
 const session = require('express-session');
 const { request } = require('https');
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 
 
 // view engine setup
