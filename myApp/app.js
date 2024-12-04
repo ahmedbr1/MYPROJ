@@ -4,7 +4,7 @@ var app = express();
 var mongodb = require('mongodb');
 const session = require('express-session');
 const { request } = require('https');
-const PORT = process.env.PORT || 3000
+
 
 
 // view engine setup
@@ -32,8 +32,8 @@ var registered = false;
 
 app.get('/', function(req, res){
   
-  res.render('login', {successMessage: registered})
-  registered = false;
+  res.render('login', {success: registered})
+  registered = 0;
   
 }) ;
 app.post('/', function(req, res){
@@ -44,13 +44,11 @@ app.post('/', function(req, res){
     res.redirect('/home')
     return;
   }
-  if (!username || !pass) res.status(400).json("You must enter a username and password");
   else{
     MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
       db = client.db('MyDB');
-      // (db.collection('users').find({username: user}).toArray())[0]
-      db.collection('users').findOne({username: username}).then((json_bourne) => {
-        if (!json_bourne) res.status(400).json("This username does not exist");
+      db.collection('MyCollection').findOne({username: username}).then((json_bourne) => {
+        if (!json_bourne) res.render('login', {success: 2});
         else{
           let real_pass = json_bourne.password
           if (pass === real_pass) {
@@ -58,7 +56,7 @@ app.post('/', function(req, res){
             res.redirect('/home');
           }
           else{
-            res.status(400).json("Wrong Password");
+            res.render('login', {success: 3})
           }
         }
       });
@@ -67,28 +65,26 @@ app.post('/', function(req, res){
 });
 
 app.get('/registration', function(req, res){
-  res.render('registration')
+  res.render('registration', {success : 1})
 }) ;
 app.post('/register', function(req, res){
   var new_username = req.body.username;
   var new_pass = req.body.password;
-  if (!new_username || !new_pass) res.status(400).json("You must enter a username and password")
-    else{
-      MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-        db = client.db('MyDB');
-        // (db.collection('users').find({username: user}).toArray())[0]
-        db.collection('users').findOne({username: new_username}).then((json_bourne) => {
-          if (json_bourne) res.status(400).json("This username already exists");
-          else{
-            db.collection('users').insertOne({username: new_username, password: new_pass}).then(() => {
-              registered = true;
-              res.redirect('/')
-            });   
-          }
-        });
-      })
+
+  MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
+    db = client.db('MyDB');
+    db.collection('MyCollection').findOne({username: new_username}).then((json_bourne) => {
+      if (json_bourne) res.render('registration', {success : 0})
+      else{
+        db.collection('MyCollection').insertOne({username: new_username, password: new_pass, list : []}).then(() => {
+          registered = 1;
+          res.redirect('/')
+        });   
+      }
+    });
+  })
       
-    }
+    
 })
 
 app.get('/home', function(req, res){
@@ -108,188 +104,192 @@ app.get('/islands', function(req, res){
 });
 
 app.get('/annapurna', function(req, res){
-  res.render('annapurna')
+  res.render('annapurna', {success: 2})
 });
 app.post('/annapurna', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Annapurna Circuit')){
-      res.status(400).json("Already in list");
+      res.render('annapurna', {success: 0})
     }
     else{
       admin_wanttogo.push('Annapurna Circuit');
+      res.render('annapurna', {success: 1})
     }
     return;
   
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Annapurna Circuit']})
-      else{
-        wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-        if (! wanttogos.includes('Annapurna Circuit')) {
-          wanttogos.push('Annapurna Circuit');
-          db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-        }
-        else{
-          res.status(400).json("Already in list");
-        }
-      }  
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+      
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Annapurna Circuit')) {
+      wanttogos.push('Annapurna Circuit');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('annapurna', {success: 1})
+    }
+    else{
+      res.render('annapurna', {success: 0})
+    }
     })
   })
 });
 
 app.get('/bali', function(req, res){
-  res.render('bali')
+  res.render('bali', {success : 2})
 });
 app.post('/bali', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Bali Island')){
-      res.status(400).json("Already in list");
+      res.render('bali', {success : 0})
     }
     else{
       admin_wanttogo.push('Bali Island');
+      res.render('bali', {success : 1})
     }
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Bali Island']})
-        else{
-          wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-          if (! wanttogos.includes('Bali Island')) {
-            wanttogos.push('Bali Island');
-            db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-          }
-          else{
-            res.status(400).json("Already in list");
-          }
-        } 
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Bali Island')) {
+      wanttogos.push('Bali Island');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('bali', {success : 1})
+    }
+    else{
+      res.render('bali', {success : 0})
+    }
     })
   })
 });
 
 app.get('/inca', function(req, res){
-  res.render('inca')
+  res.render('inca', {success : 2})
 });
 app.post('/inca', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Inca Trail to Machu Picchu')){
-      res.status(400).json("Already in list");
+      res.render('inca', {success : 0})
     }
     else{
       admin_wanttogo.push('Inca Trail to Machu Picchu');
+      res.render('inca', {success : 1})
     }
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Inca Trail to Machu Picchu']})
-        else{
-          wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-          if (! wanttogos.includes('Inca Trail to Machu Picchu')) {
-            wanttogos.push('Inca Trail to Machu Picchu');
-            db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-          }
-          else{
-            res.status(400).json("Already in list");
-          }
-        } 
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Inca Trail to Machu Picchu')) {
+      wanttogos.push('Inca Trail to Machu Picchu');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('inca', {success : 1})
+    }
+    else{
+      res.render('inca', {success : 0})
+    } 
     })
   })
 });
 
 app.get('/paris', function(req, res){
-  res.render('paris')
+  res.render('paris', {success : 2})
 });
 app.post('/paris', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Paris')){
-      res.status(400).json("Already in list");
+      res.render('paris', {success : 0})
     }
     else{
       admin_wanttogo.push('Paris');
+      res.render('paris', {success : 1})
     }
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Paris']})
-        else{
-          wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-          if (! wanttogos.includes('Paris')) {
-            wanttogos.push('Paris');
-            db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-          }
-          else{
-            res.status(400).json("Already in list");
-          }
-        } 
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Paris')) {
+      wanttogos.push('Paris');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('paris', {success : 1})
+    }
+    else{
+      res.render('paris', {success : 0})
+    }
+
     })
   })
 });
 
 app.get('/rome', function(req, res){
-  res.render('rome')
+  res.render('rome', {success : 2})
 });
 app.post('/rome', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Rome')){
-      res.status(400).json("Already in list");
+      res.render('rome', {success : 0})
     }
     else{
       admin_wanttogo.push('Rome');
+      res.render('rome', {success : 1})
     }
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Rome']})
-        else{
-          wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-          if (! wanttogos.includes('Rome')) {
-            wanttogos.push('Rome');
-            db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-          }
-          else{
-            res.status(400).json("Already in list");
-          }
-        } 
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Rome')) {
+      wanttogos.push('Rome');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('rome', {success : 1})
+    }
+    else{
+      res.render('rome', {success : 0})
+    }
+
     })
   })
 });
 
 app.get('/santorini', function(req, res){
-  res.render('santorini')
+  res.render('santorini', {success : 2})
 });
 app.post('/santorini', function(req, res){
   if (req.session.user.username === 'admin' && req.session.user.pass === 'admin') {
     if (admin_wanttogo.includes('Santorini Island')){
-      res.status(400).json("Already in list");
+      res.render('santorini', {success : 0})
     }
     else{
       admin_wanttogo.push('Santorini Island');
+      res.render('santorini', {success : 1})
     }
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) db.collection('wanttogos').insertOne({username: req.session.user.username, list: ['Santorini Island']})
-        else{
-          wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-          if (! wanttogos.includes('Santorini Island')) {
-            wanttogos.push('Santorini Island');
-            db.collection('wanttogos').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
-          }
-          else{
-            res.status(400).json("Already in list");
-          }
-        } 
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+
+    wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+    if (! wanttogos.includes('Santorini Island')) {
+      wanttogos.push('Santorini Island');
+      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      res.render('santorini', {success : 1})
+    }
+    else{
+      res.render('santorini', {success : 0})
+    }
+
     })
   })
 });
@@ -301,12 +301,9 @@ app.get('/wanttogo', function(req, res){
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
     db = client.db('MyDB');
-    db.collection('wanttogos').findOne({username: req.session.user.username}).then(json_bourne => {
-      if (!json_bourne) res.render('wanttogo', {dests: []});
-      else{
-        wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
-        res.render('wanttogo', {dests: wanttogos});
-      }
+    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+      wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
+      res.render('wanttogo', {dests: wanttogos});
     })
   })
 });
@@ -324,7 +321,7 @@ app.post('/search', function(req, res){
 }) ;
 
 
-app.listen(PORT);
+app.listen(3000);
 
 
 

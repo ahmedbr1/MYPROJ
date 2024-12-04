@@ -20,6 +20,33 @@
             color: white;
             -webkit-text-stroke: 0.5px black;
         }
+        .cont {
+            position:relative;
+            left:600px;
+            top:50px;
+            color: white;
+        }
+        .alert {
+        padding: 20px;
+        background-color: #f44336; 
+        color: white;
+        margin-bottom: 15px;
+        }
+
+        .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+        }
+
+        .closebtn:hover {
+        color: black;
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,12 +60,19 @@
     <div class="container">
         <h1>Registration</h1>
     </div>
+    <% if (success == 0) { %>
+        <div class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            Username is taken!
+          </div>
+    <% } %>
     <div class="cont">
         <form method='post' action='/register'>
-            Username: <br>
-            <input type="text" id="user" name="username"> <br>
-            Password: <br>
-            <input type="password" id="password" name="password"> <br> <br>
+            Username:<br>
+            <input type="text" name="username" pattern="^[a-zA-Z1-9].*" required>
+            <br>
+            Password:<br>
+            <input type="password" name="password" pattern="^[a-zA-Z1-9].*" required>
             <input type="submit" id="simple_click" class="btn btn-secondary" value="Register"> <br>
         </form>
     </div>

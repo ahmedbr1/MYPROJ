@@ -49,19 +49,31 @@
 </head>
 
 <body>
-    <% if (successMessage) { %>
-        <div class="alert">
+    <% if (success == 1) { %>
+        <div style = "background-color: green;" class="alert">
             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
             Account created succesfully.
+          </div>
+    <% } %>
+    <% if (success == 2) { %>
+        <div class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            Username does not exist!
+          </div>
+    <% } %>
+    <% if (success == 3) { %>
+        <div class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            Wrong password!
           </div>
     <% } %>
     <div class="cont">
         <form method="POST">
             Username:<br>
-            <input type="text" name="username" pattern="^[a-zA-Z1-9].*">
+            <input type="text" name="username" pattern="^[a-zA-Z1-9].*" required>
             <br>
             Password:<br>
-            <input type="password" name="password" pattern="^[a-zA-Z1-9].*">
+            <input type="password" name="password" pattern="^[a-zA-Z1-9].*" required>
             <br><br>
             <input type="submit" value="Login">
         </form>
