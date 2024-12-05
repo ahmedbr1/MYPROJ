@@ -289,7 +289,6 @@ app.post('/santorini', function(req, res){
     else{
       res.render('santorini', {success : 0})
     }
-
     })
   })
 });
