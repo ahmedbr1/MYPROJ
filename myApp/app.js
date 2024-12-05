@@ -46,8 +46,8 @@ app.post('/', function(req, res){
   }
   else{
     MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-      db = client.db('MyDB');
-      db.collection('MyCollection').findOne({username: username}).then((json_bourne) => {
+      db = client.db('myDB');
+      db.collection('myCollection').findOne({username: username}).then((json_bourne) => {
         if (!json_bourne) res.render('login', {success: 2});
         else{
           let real_pass = json_bourne.password
@@ -72,11 +72,11 @@ app.post('/register', function(req, res){
   var new_pass = req.body.password;
 
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: new_username}).then((json_bourne) => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: new_username}).then((json_bourne) => {
       if (json_bourne) res.render('registration', {success : 0})
       else{
-        db.collection('MyCollection').insertOne({username: new_username, password: new_pass, list : []}).then(() => {
+        db.collection('myCollection').insertOne({username: new_username, password: new_pass, list : []}).then(() => {
           registered = 1;
           res.redirect('/')
         });   
@@ -119,14 +119,14 @@ app.post('/annapurna', function(req, res){
   
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
       
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Annapurna Circuit')) {
       wanttogos.push('Annapurna Circuit');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('annapurna', {success: 1})
     }
     else{
@@ -151,13 +151,13 @@ app.post('/bali', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Bali Island')) {
       wanttogos.push('Bali Island');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('bali', {success : 1})
     }
     else{
@@ -182,13 +182,13 @@ app.post('/inca', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Inca Trail to Machu Picchu')) {
       wanttogos.push('Inca Trail to Machu Picchu');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('inca', {success : 1})
     }
     else{
@@ -213,13 +213,13 @@ app.post('/paris', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Paris')) {
       wanttogos.push('Paris');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('paris', {success : 1})
     }
     else{
@@ -245,13 +245,13 @@ app.post('/rome', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Rome')) {
       wanttogos.push('Rome');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('rome', {success : 1})
     }
     else{
@@ -277,13 +277,13 @@ app.post('/santorini', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
 
     wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
     if (! wanttogos.includes('Santorini Island')) {
       wanttogos.push('Santorini Island');
-      db.collection('MyCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
+      db.collection('myCollection').updateOne({username: req.session.user.username}, { $set: { list: wanttogos } })
       res.render('santorini', {success : 1})
     }
     else{
@@ -300,8 +300,8 @@ app.get('/wanttogo', function(req, res){
     return;
   }
   MongoClient.connect('mongodb://127.0.0.1:27017').then((client) => {
-    db = client.db('MyDB');
-    db.collection('MyCollection').findOne({username: req.session.user.username}).then(json_bourne => {
+    db = client.db('myDB');
+    db.collection('myCollection').findOne({username: req.session.user.username}).then(json_bourne => {
       wanttogos = JSON.parse(JSON.stringify(json_bourne)).list
       res.render('wanttogo', {dests: wanttogos});
     })
